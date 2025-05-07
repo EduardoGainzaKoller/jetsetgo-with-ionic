@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate>
+
+
+    <ion-item>
+      <ion-input
+        type="text"
+        label="Nombre"
+        labelPlacement="floating"
+        fill="solid"
+        [(ngModel)]="userData.name"
+        name="name"
+        required
+      ></ion-input>
+    </ion-item>
+
+
+    <ion-item>
+      <ion-input
+        type="text"
+        label="Apellido"
+        labelPlacement="floating"
+        fill="solid"
+        [(ngModel)]="userData.lastname"
+        name="lastname"
+        required
+      ></ion-input>
+    </ion-item>
+
+
+    <ion-item lines="none">
+      <ion-label>Imagen de perfil</ion-label>
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </ion-item>
+
+    <div *ngIf="userData.profile_image" class="image-preview">
+      <img [src]="userData.profile_image" alt="Imagen de perfil" width="100" />
+    </div>
+
+
+    <ion-item>
+      <ion-input
+        type="email"
+        label="Email"
+        labelPlacement="floating"
+        fill="solid"
+        helperText="Enter a valid email"
+        errorText="Invalid email"
+        [(ngModel)]="email"
+        name="email"
+        required
+        email
+      ></ion-input>
+    </ion-item>
+
+
+    <ion-item>
+      <ion-input
+        type="password"
+        label="Contraseña"
+        labelPlacement="floating"
+        fill="solid"
+        helperText="Debe tener al menos 6 caracteres"
+        errorText="Campo obligatorio"
+        [(ngModel)]="password"
+        name="password"
+        required
+        minlength="6"
+      ></ion-input>
+    </ion-item>
+
+
+    <ion-button expand="block" type="submit" [disabled]="form.invalid">
+      Registrarse
+    </ion-button>
+  </form>
+</ion-content>
