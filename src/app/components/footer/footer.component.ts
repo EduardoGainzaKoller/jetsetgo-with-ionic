@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {
   IonContent,
   IonHeader,
-  IonIcon,
+  IonIcon, IonTab,
   IonTabBar,
   IonTabButton,
   IonTabs,
@@ -22,7 +22,8 @@ import {
     IonTitle,
     IonTabBar,
     IonTabButton,
-    IonIcon
+    IonIcon,
+    IonTab
   ]
 })
 export class FooterComponent {

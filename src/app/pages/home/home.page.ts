@@ -3,29 +3,26 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonAvatar,
-  IonContent,
-  IonHeader,
+  IonContent, IonFooter,
   IonInfiniteScroll, IonInfiniteScrollContent,
   IonItem,
   IonLabel,
   IonList,
-  IonTitle,
-  IonToolbar
 } from '@ionic/angular/standalone';
 import {Pokemon} from "../../models/pokemon";
 import { PokemonService } from 'src/app/services/pokemon.service';
 import {InfiniteScrollCustomEvent} from "@ionic/angular";
+import {FooterComponent} from "../../components/footer/footer.component";
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonList, IonItem, IonLabel, IonInfiniteScroll, IonInfiniteScrollContent, IonAvatar]
+  imports: [IonContent, CommonModule, FormsModule, IonList, IonItem, IonLabel, IonInfiniteScroll, IonInfiniteScrollContent, IonAvatar, IonFooter, FooterComponent]
 })
 export class HomePage implements OnInit {
 
-  pokemon: Pokemon | null = null;
   pokemons: Pokemon[] = [];
   pokemonService: PokemonService = inject(PokemonService);
 
