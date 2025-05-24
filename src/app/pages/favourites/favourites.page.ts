@@ -1,93 +1,102 @@
-import {Component, inject, OnInit} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   ActionSheetController,
+  ModalController,
   IonAvatar,
   IonButton,
   IonContent,
   IonHeader,
-  IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList,
+  IonItem,
+  IonLabel,
+  IonList,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import {FooterComponent} from "../../components/footer/footer.component";
-import {Pokemon} from "../../models/pokemon";
-import {PokemonService} from "../../services/pokemon.service";
-import {DatabaseService} from "../../services/database.service";
-import {InfiniteScrollCustomEvent} from "@ionic/angular";
-import {Router} from "@angular/router";
+import { FooterComponent } from '../../components/footer/footer.component';
+// ruta corregida al folder `details-pop-up`
+import { DetailPopUpComponent } from '../../components/detail-pop-up/detail-pop-up.component';
+import { Pokemon } from '../../models/pokemon';
+import { PokemonService } from '../../services/pokemon.service';
+import { DatabaseService } from '../../services/database.service';
 
 @Component({
   selector: 'app-favourites',
-  templateUrl: './favourites.page.html',
-  styleUrls: ['./favourites.page.scss'],
   standalone: true,
-    imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, FooterComponent, IonAvatar, IonButton, IonItem, IonLabel, IonList]
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonList,
+    IonItem,
+    IonAvatar,
+    IonLabel,
+    IonButton,
+    FooterComponent,
+    DetailPopUpComponent
+  ],
+  templateUrl: './favourites.page.html',
+  styleUrls: ['./favourites.page.scss']
 })
 export class FavouritesPage implements OnInit {
   pokemons: Pokemon[] = [];
   favorites: string[] = [];
-  pokemonService: PokemonService = inject(PokemonService);
-  databaseService: DatabaseService = inject(DatabaseService);
-  router: Router = inject(Router);
 
-  constructor(private actionSheetController: ActionSheetController) {}
+  private pokemonService = inject(PokemonService);
+  private databaseService = inject(DatabaseService);
+  private actionSheetController = inject(ActionSheetController);
+  private modalController = inject(ModalController);
 
-  async ngOnInit() {
-
-    this.databaseService.favoritesChanged$.subscribe(() => {
-      this.loadFavorites();
-    });
-
+  ngOnInit() {
+    this.databaseService.favoritesChanged$.subscribe(() => this.loadFavorites());
+    this.loadFavorites();
   }
 
-  async loadFavorites() {
+  private async loadFavorites() {
     this.favorites = await this.databaseService.getFavorites();
     this.pokemons = [];
-
     for (const id of this.favorites) {
-
       if (this.pokemons.find(p => p.id === id)) continue;
-
-      this.pokemonService.getPokemonById(id).subscribe(pokemon => {
-        this.pokemons.push(pokemon);
-      });
+      this.pokemonService.getPokemonById(id)
+        .subscribe(p => this.pokemons.push(p));
     }
   }
 
+  trackByPokemon(_i: number, p: Pokemon) {
+    return p.id;
+  }
 
-
-  async presentActionSheet({pokemon}: { pokemon: Pokemon }) {
-    const actionSheet = await this.actionSheetController.create({
+  async presentActionSheet({ pokemon }: { pokemon: Pokemon }) {
+    const as = await this.actionSheetController.create({
       header: 'Options',
-      cssClass: 'my-custom-class',
-      buttons: [{
-        text: 'Favorite',
-        icon: 'heart',
-        handler: async () => {
-          await this.databaseService.addFavorite(pokemon.id);
-          console.log(`${pokemon.nombre} added to favorites`);
-        }
-      }, {
-        text: 'Cancel',
-        icon: 'close',
-        role: 'cancel',
-        handler: () => {
-          console.log('Cancel clicked');
-        }
-      }, {
-        text: 'Remove',
-        icon: 'X',
-        handler: async () => {
-          await this.databaseService.removeFavorite(pokemon.id);
-          console.log(`${pokemon.nombre} remove from favorites`);
-        }
-      }]
+      buttons: [
+        {
+          text: 'Details',
+          icon: 'information-circle',
+          handler: () => this.openDetailPopup(pokemon)
+        },
+        {
+          text: 'Remove',
+          icon: 'trash',
+          handler: async () => {
+            await this.databaseService.removeFavorite(pokemon.id);
+          }
+        },
+        { text: 'Cancel', icon: 'close', role: 'cancel' }
+      ]
     });
-    await actionSheet.present();
+    await as.present();
+  }
 
-    const { role, data } = await actionSheet.onDidDismiss();
-    console.log('onDidDismiss resolved with role and data', role, data);
+  private async openDetailPopup(pokemon: Pokemon) {
+    const m = await this.modalController.create({
+      component: DetailPopUpComponent,
+      componentProps: { pokemon }
+    });
+    await m.present();
   }
 }

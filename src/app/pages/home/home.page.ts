@@ -3,39 +3,61 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   ActionSheetController,
-  IonAvatar, IonButton,
-  IonContent, IonFooter, IonHeader, IonIcon,
-  IonInfiniteScroll, IonInfiniteScrollContent,
+  ModalController,
+  IonAvatar,
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonLabel,
-  IonList, IonTab, IonTabBar, IonTabButton, IonTabs, IonTitle, IonToolbar,
+  IonList,
+  IonTitle,
+  IonToolbar
 } from '@ionic/angular/standalone';
-import {Pokemon} from "../../models/pokemon";
+import { FooterComponent } from '../../components/footer/footer.component';
+import { DetailPopUpComponent } from '../../components/detail-pop-up/detail-pop-up.component';
+import { Pokemon } from '../../models/pokemon';
 import { PokemonService } from 'src/app/services/pokemon.service';
-import {InfiniteScrollCustomEvent} from "@ionic/angular";
-import {FooterComponent} from "../../components/footer/footer.component";
-import {DatabaseService} from "../../services/database.service";
+import { DatabaseService } from '../../services/database.service';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
-  templateUrl: './home.page.html',
-  styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, IonList, IonItem, IonLabel, IonInfiniteScroll, IonInfiniteScrollContent, IonAvatar, IonHeader, IonTitle, IonToolbar, IonButton, FooterComponent, IonFooter]
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+    IonAvatar,
+    IonButton,
+    FooterComponent,
+    DetailPopUpComponent
+  ],
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss']
 })
 export class HomePage implements OnInit {
-
   pokemons: Pokemon[] = [];
-  pokemonService: PokemonService = inject(PokemonService);
 
-  limit: number = 20;
+  limit = 20;
   lastName: string | null = null;
-  loading: boolean = false;
+  loading = false;
   disableInfiniteScroll = false;
 
-  databaseService: DatabaseService = inject(DatabaseService);
-
-  constructor(private actionSheetController: ActionSheetController) {}
+  private pokemonService = inject(PokemonService);
+  private databaseService = inject(DatabaseService);
+  private actionSheetController = inject(ActionSheetController);
+  private modalController = inject(ModalController);
 
   ngOnInit() {
     this.loadFirstPokemons();
@@ -43,13 +65,13 @@ export class HomePage implements OnInit {
 
   loadFirstPokemons() {
     this.loading = true;
-    this.pokemonService.getFirstBatch(this.limit).subscribe(pokemons => {
-      this.pokemons = pokemons;
+    this.pokemonService.getFirstBatch(this.limit).subscribe(list => {
+      this.pokemons = list;
       this.loading = false;
-      if (pokemons.length > 0) {
-        this.lastName = pokemons[pokemons.length - 1].nombre;
+      if (list.length > 0) {
+        this.lastName = list[list.length - 1].nombre;
       }
-      if (pokemons.length < this.limit) {
+      if (list.length < this.limit) {
         this.disableInfiniteScroll = true;
       }
     });
@@ -57,57 +79,58 @@ export class HomePage implements OnInit {
 
   onIonInfinite(event: InfiniteScrollCustomEvent) {
     if (this.loading || this.disableInfiniteScroll) return;
-
     this.loading = true;
-    this.pokemonService.getNextBatch(this.limit, this.lastName!).subscribe(pokemons => {
-      this.pokemons.push(...pokemons);
+    this.pokemonService.getNextBatch(this.limit, this.lastName!).subscribe(list => {
+      this.pokemons.push(...list);
       this.loading = false;
       event.target.complete();
-
-      if (pokemons.length > 0) {
-        this.lastName = pokemons[pokemons.length - 1].nombre;
+      if (list.length > 0) {
+        this.lastName = list[list.length - 1].nombre;
       }
-
-      if (pokemons.length < this.limit) {
+      if (list.length < this.limit) {
         this.disableInfiniteScroll = true;
         event.target.disabled = true;
       }
     });
   }
 
-  async presentActionSheet({pokemon}: { pokemon: Pokemon }) {
-    const actionSheet = await this.actionSheetController.create({
+  async presentActionSheet({ pokemon }: { pokemon: Pokemon }) {
+    const sheet = await this.actionSheetController.create({
       header: 'Options',
-      cssClass: 'my-custom-class',
-      buttons: [{
-        text: 'Favorite',
-        icon: 'heart',
-        handler: async () => {
-          await this.databaseService.addFavorite(pokemon.id);
-          console.log(`${pokemon.id} added to favorites`);
+      buttons: [
+        {
+          text: 'Favorite',
+          icon: 'heart',
+          handler: async () => {
+            await this.databaseService.addFavorite(pokemon.id);
+            console.log(`${pokemon.id} added to favorites`);
+          }
+        },
+        {
+          text: 'Details',
+          icon: 'information-circle',
+          handler: () => this.openDetailPopup(pokemon)
+        },
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
         }
-      }, {
-        text: 'Cancel',
-        icon: 'close',
-        role: 'cancel',
-        handler: () => {
-          console.log('Cancel clicked');
-        }
-      }, {
-        text: 'Details',
-        icon: 'X',
-        handler: async () => {
-          await this.databaseService.removeFavorite(pokemon.id);
-          console.log(`${pokemon.nombre} remove from favorites`);
-        }
-      }]
+      ]
     });
-    await actionSheet.present();
-
-    const { role, data } = await actionSheet.onDidDismiss();
-    console.log('onDidDismiss resolved with role and data', role, data);
+    await sheet.present();
   }
 
+  private async openDetailPopup(pokemon: Pokemon) {
+    const m = await this.modalController.create({
+      component: DetailPopUpComponent,
+      componentProps: { pokemon }
+    });
+    await m.present();
+  }
 
-
+  // <-- Nuevo método trackBy
+  trackByPokemon(_i: number, p: Pokemon): string {
+    return p.id;
+  }
 }

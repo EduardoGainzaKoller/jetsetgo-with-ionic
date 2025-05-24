@@ -6,22 +6,25 @@
 
 <ion-content>
   <ion-list>
-    @for (pokemon of pokemons; track pokemon.id; let index = $index) {
-      <ion-item>
-          <ion-button (click)="presentActionSheet({pokemon : pokemon})">
-            <ion-avatar slot="start">
-              <img [src]="pokemon.imagen" alt="avatar" />
-            </ion-avatar>
-            <ion-label>{{ pokemon.nombre }}</ion-label>
-          </ion-button>
-      </ion-item>
-    }
+    <ion-item *ngFor="let pokemon of pokemons; trackBy: trackByPokemon">
+      <ion-button fill="clear" (click)="presentActionSheet({ pokemon })">
+        <ion-avatar slot="start">
+          <img [src]="pokemon.imagen" alt="{{ pokemon.nombre }}" />
+        </ion-avatar>
+        <ion-label>{{ pokemon.nombre }}</ion-label>
+      </ion-button>
+    </ion-item>
   </ion-list>
 
   <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
   </ion-infinite-scroll>
+
+  <!-- Popup fantasma para que Angular registre el selector -->
+  <app-detail-pop-up
+    *ngIf="false"
+    [pokemon]="pokemons[0]">
+  </app-detail-pop-up>
 </ion-content>
 
 <app-footer></app-footer>
-
