@@ -4,7 +4,7 @@ import {
   collection,
   collectionData,
   deleteDoc,
-  doc,
+  doc, docData,
   Firestore, limit,
   orderBy,
   query, startAfter,
@@ -40,6 +40,11 @@ export class PokemonService {
   deletePokemon(id: string) {
     const pokemonRef = doc(this.firestore, `pokemones/${id}`);
     return deleteDoc(pokemonRef);
+  }
+
+  getPokemonById(id: string): Observable<Pokemon> {
+    const pokemonDoc = doc(this.firestore, `pokemones/${id}`);
+    return docData(pokemonDoc, { idField: 'id' }) as Observable<Pokemon>;
   }
 
   getFirstBatch(limitCount: number): Observable<Pokemon[]> {

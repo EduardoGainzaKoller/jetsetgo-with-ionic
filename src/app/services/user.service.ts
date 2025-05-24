@@ -27,4 +27,8 @@ export class UserService {
     const userRef = collection(this.firestore, 'users');
     return addDoc(userRef, user);
   }
+
+  getCurrentUserUID(): string | null {
+    return this.currentUserSubject.value?.uid ?? null;
+  }
 }

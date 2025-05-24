@@ -9,6 +9,7 @@ import {
   IonTitle,
   IonToolbar
 } from "@ionic/angular/standalone";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-footer',
@@ -23,7 +24,8 @@ import {
     IonTabBar,
     IonTabButton,
     IonIcon,
-    IonTab
+    IonTab,
+    RouterLink
   ]
 })
 export class FooterComponent {

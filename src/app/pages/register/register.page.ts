@@ -13,6 +13,7 @@ import {
 } from '@ionic/angular/standalone';
 import {User} from "../../models/user";
 import {UserService} from "../../services/user.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-register',
@@ -33,6 +34,7 @@ export class RegisterPage {
   password: string = '';
 
   userService: UserService = inject(UserService);
+  router: Router = inject(Router);
 
   constructor() {}
 
@@ -40,6 +42,7 @@ export class RegisterPage {
     if (form.valid) {
       this.userService.register(this.email, this.password);
       this.userService.saveUserData(this.userData);
+      this.router.navigate(['/home']);
     } else {
       console.log('Formulario inválido');
     }

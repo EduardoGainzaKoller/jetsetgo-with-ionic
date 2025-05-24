@@ -1,20 +1,27 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Pokémon</ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content>
   <ion-list>
     @for (pokemon of pokemons; track pokemon.id; let index = $index) {
       <ion-item>
-        <ion-avatar slot="start">
-          <img [src]="pokemon.imagen" alt="avatar" />
-        </ion-avatar>
-        <ion-label>{{ pokemon.nombre }}</ion-label>
+          <ion-button (click)="presentActionSheet({pokemon : pokemon})">
+            <ion-avatar slot="start">
+              <img [src]="pokemon.imagen" alt="avatar" />
+            </ion-avatar>
+            <ion-label>{{ pokemon.nombre }}</ion-label>
+          </ion-button>
       </ion-item>
     }
   </ion-list>
+
   <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>
 
-
-
-
+<app-footer></app-footer>
 
