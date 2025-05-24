@@ -23,7 +23,7 @@ import {Router} from "@angular/router";
   templateUrl: './favourites.page.html',
   styleUrls: ['./favourites.page.scss'],
   standalone: true,
-    imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, FooterComponent, IonAvatar, IonButton, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList]
+    imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, FooterComponent, IonAvatar, IonButton, IonItem, IonLabel, IonList]
 })
 export class FavouritesPage implements OnInit {
   pokemons: Pokemon[] = [];

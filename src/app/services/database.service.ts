@@ -39,6 +39,7 @@ export class DatabaseService {
     const data = localStorage.getItem(this.localKey);
     const allFavorites = data ? JSON.parse(data) : {};
     allFavorites[uid] = ids;
+    console.log(allFavorites);
     localStorage.setItem(this.localKey, JSON.stringify(allFavorites));
   }
 
@@ -67,6 +68,7 @@ export class DatabaseService {
 
   async addFavorite(id: string): Promise<void> {
     const uid = this.userService.getCurrentUserUID();
+    console.log(uid);
     if (!uid) return;
     if (this.platform === 'web') {
       const ids = this.getLocalFavorites();

@@ -1,5 +1,12 @@
 import {inject, Injectable} from '@angular/core';
-import {Auth, createUserWithEmailAndPassword, onAuthStateChanged, User, UserCredential} from '@angular/fire/auth';
+import {
+  Auth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  User,
+  UserCredential
+} from '@angular/fire/auth';
 import { BehaviorSubject } from 'rxjs';
 import { User as appUser } from '../models/user';
 import {addDoc, collection, Firestore} from "@angular/fire/firestore";
@@ -30,5 +37,9 @@ export class UserService {
 
   getCurrentUserUID(): string | null {
     return this.currentUserSubject.value?.uid ?? null;
+  }
+
+  async login(email: string, password: string): Promise<UserCredential> {
+    return await signInWithEmailAndPassword(this.auth, email, password);
   }
 }

@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Iniciar Sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form #form="ngForm" (ngSubmit)="onLogin(form)" novalidate>
+    <ion-item>
+      <ion-input
+        type="email"
+        label="Email"
+        labelPlacement="floating"
+        fill="solid"
+        helperText="Introduce un email válido"
+        errorText="Email inválido"
+        [(ngModel)]="email"
+        name="email"
+        required
+        email
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        type="password"
+        label="Contraseña"
+        labelPlacement="floating"
+        fill="solid"
+        helperText="Introduce tu contraseña"
+        errorText="Campo obligatorio"
+        [(ngModel)]="password"
+        name="password"
+        required
+        minlength="6"
+      ></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" [disabled]="form.invalid">
+      Iniciar Sesión
+    </ion-button>
+  </form>
+</ion-content>
+

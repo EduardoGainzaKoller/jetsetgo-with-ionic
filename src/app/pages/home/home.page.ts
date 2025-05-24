@@ -39,7 +39,6 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.loadFirstPokemons();
-    console.log(this.pokemons);
   }
 
   loadFirstPokemons() {
@@ -95,7 +94,7 @@ export class HomePage implements OnInit {
           console.log('Cancel clicked');
         }
       }, {
-        text: 'Remove',
+        text: 'Details',
         icon: 'X',
         handler: async () => {
           await this.databaseService.removeFavorite(pokemon.id);
