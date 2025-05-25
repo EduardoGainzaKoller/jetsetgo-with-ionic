@@ -3,6 +3,7 @@ import {FormsModule, NgForm} from '@angular/forms';
 import { NavController, ToastController } from '@ionic/angular';
 import {UserService} from "../../services/user.service";
 import {IonButton, IonContent, IonHeader, IonInput, IonItem, IonTitle, IonToolbar} from "@ionic/angular/standalone";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,8 @@ import {IonButton, IonContent, IonHeader, IonInput, IonItem, IonTitle, IonToolba
     IonTitle,
     IonHeader,
     FormsModule,
-    IonButton
+    IonButton,
+    RouterLink
   ]
 })
 export class LoginPage {

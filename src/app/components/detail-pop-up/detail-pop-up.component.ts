@@ -12,7 +12,7 @@ import {
   IonList,
   IonItem,
   IonLabel,
-  ModalController
+  ModalController, IonFooter
 } from '@ionic/angular/standalone';
 import { Pokemon } from '../../models/pokemon';
 
@@ -29,7 +29,8 @@ import { Pokemon } from '../../models/pokemon';
     IonContent,
     IonList,
     IonItem,
-    IonLabel
+    IonLabel,
+    IonFooter
   ],
   templateUrl: './detail-pop-up.component.html',
   styleUrls: ['./detail-pop-up.component.scss']

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -15,11 +15,11 @@ import {
   IonToolbar
 } from '@ionic/angular/standalone';
 import { FooterComponent } from '../../components/footer/footer.component';
-// ruta corregida al folder `details-pop-up`
 import { DetailPopUpComponent } from '../../components/detail-pop-up/detail-pop-up.component';
 import { Pokemon } from '../../models/pokemon';
 import { PokemonService } from '../../services/pokemon.service';
 import { DatabaseService } from '../../services/database.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-favourites',
@@ -42,61 +42,119 @@ import { DatabaseService } from '../../services/database.service';
   templateUrl: './favourites.page.html',
   styleUrls: ['./favourites.page.scss']
 })
-export class FavouritesPage implements OnInit {
+export class FavouritesPage implements OnInit, OnDestroy {
   pokemons: Pokemon[] = [];
-  favorites: string[] = [];
-
+  loading = false;
+  private destroy$ = new Subject<void>();
   private pokemonService = inject(PokemonService);
   private databaseService = inject(DatabaseService);
   private actionSheetController = inject(ActionSheetController);
   private modalController = inject(ModalController);
 
   ngOnInit() {
-    this.databaseService.favoritesChanged$.subscribe(() => this.loadFavorites());
     this.loadFavorites();
+
+    this.databaseService.favoritePokemons$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(favoritePokemons => {
+        this.pokemons = favoritePokemons;
+        console.log('Pokemon favoritos actualizados:', favoritePokemons.length);
+      });
+
+    this.databaseService.favoritesChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(change => {
+        console.log(`Pokemon ${change.pokemonId} ${change.isLiked ? 'aÃ±adido a' : 'removido de'} favoritos`);
+      });
   }
 
-  private async loadFavorites() {
-    this.favorites = await this.databaseService.getFavorites();
-    this.pokemons = [];
-    for (const id of this.favorites) {
-      if (this.pokemons.find(p => p.id === id)) continue;
-      this.pokemonService.getPokemonById(id)
-        .subscribe(p => this.pokemons.push(p));
-    }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  trackByPokemon(_i: number, p: Pokemon) {
+  private loadFavorites() {
+    this.loading = true;
+    this.databaseService.getFavoritePokemons().subscribe({
+      next: (pokemons) => {
+        this.pokemons = pokemons;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando favoritos:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  trackByPokemon(_i: number, p: Pokemon): string {
     return p.id;
   }
 
   async presentActionSheet({ pokemon }: { pokemon: Pokemon }) {
-    const as = await this.actionSheetController.create({
-      header: 'Options',
+    const actionSheet = await this.actionSheetController.create({
+      header: pokemon.nombre || 'Pokemon Options',
       buttons: [
         {
-          text: 'Details',
+          text: 'View Details',
           icon: 'information-circle',
           handler: () => this.openDetailPopup(pokemon)
         },
         {
-          text: 'Remove',
-          icon: 'trash',
+          text: 'Remove from Favorites',
+          icon: 'heart-dislike',
+          role: 'destructive',
           handler: async () => {
-            await this.databaseService.removeFavorite(pokemon.id);
+            try {
+              await this.databaseService.removeFavorite(pokemon.id);
+              console.log(`${pokemon.nombre} removed from favorites`);
+            } catch (error) {
+              console.error('Error removing favorite:', error);
+            }
           }
         },
-        { text: 'Cancel', icon: 'close', role: 'cancel' }
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
+        }
       ]
     });
-    await as.present();
+    await actionSheet.present();
   }
 
   private async openDetailPopup(pokemon: Pokemon) {
-    const m = await this.modalController.create({
+    const modal = await this.modalController.create({
       component: DetailPopUpComponent,
       componentProps: { pokemon }
     });
-    await m.present();
+    await modal.present();
+  }
+
+  async removeFavorite(pokemon: Pokemon, event: Event) {
+    event.stopPropagation();
+    try {
+      await this.databaseService.removeFavorite(pokemon.id);
+      console.log(`${pokemon.nombre} removed from favorites`);
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+    }
+  }
+
+  async refreshFavorites(event?: any) {
+    this.loadFavorites();
+    if (event) {
+      setTimeout(() => {
+        event.target.complete();
+      }, 1000);
+    }
+  }
+
+  get hasFavorites(): boolean {
+    return this.pokemons.length > 0;
+  }
+
+  get isLoading(): boolean {
+    return this.loading;
   }
 }

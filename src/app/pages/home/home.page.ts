@@ -95,15 +95,27 @@ export class HomePage implements OnInit {
   }
 
   async presentActionSheet({ pokemon }: { pokemon: Pokemon }) {
+
+    const isFavorite = await this.databaseService.isFavorite(pokemon.id);
+
     const sheet = await this.actionSheetController.create({
       header: 'Options',
       buttons: [
         {
-          text: 'Favorite',
-          icon: 'heart',
+          text: isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
+          icon: isFavorite ? 'heart-dislike' : 'heart',
           handler: async () => {
-            await this.databaseService.addFavorite(pokemon.id);
-            console.log(`${pokemon.id} added to favorites`);
+            try {
+              if (isFavorite) {
+                await this.databaseService.removeFavorite(pokemon.id);
+                console.log(`${pokemon.nombre} removed from favorites`);
+              } else {
+                await this.databaseService.addFavorite(pokemon.id);
+                console.log(`${pokemon.nombre} added to favorites`);
+              }
+            } catch (error) {
+              console.error('Error toggling favorite:', error);
+            }
           }
         },
         {
@@ -129,8 +141,21 @@ export class HomePage implements OnInit {
     await m.present();
   }
 
-  // <-- Nuevo método trackBy
   trackByPokemon(_i: number, p: Pokemon): string {
     return p.id;
+  }
+
+  async toggleFavorite(pokemon: Pokemon, event: Event) {
+    event.stopPropagation();
+    try {
+      const newState = await this.databaseService.togglePokemonFavorite(pokemon.id);
+      console.log(`${pokemon.nombre} ${newState ? 'added to' : 'removed from'} favorites`);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  }
+
+  async isPokemonFavorite(pokemonId: string): Promise<boolean> {
+    return await this.databaseService.isFavorite(pokemonId);
   }
 }
